@@ -373,8 +373,8 @@
     <div class="frame-overlay-msg" id="frame-loading-msg">Loading UltraBox…</div>
     <iframe
         id="ultrabox-frame"
-        src="https://ultraabox.github.io/"
-        title="UltraBox Music Editor"
+        src="/ultrabox/index.html"
+        title="XKERO_Z // UltraBox"
         allow="autoplay"
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
         loading="lazy"
@@ -595,9 +595,9 @@ document.getElementById('import-list-file').addEventListener('change', function(
 function buildUltraBoxURL() {
     if (sampleList.length === 0) return null;
     // UltraBox accepts custom samples via the "customSamples" query parameter
-    // Format: https://ultraabox.github.io/?customSamples=url1|url2|...
+    // Format: /ultrabox/index.html?customSamples=url1|url2|...
     const encoded = sampleList.map(s => encodeURIComponent(s.url)).join('|');
-    return `https://ultraabox.github.io/?customSamples=${encoded}`;
+    return `/ultrabox/index.html?customSamples=${encoded}`;
 }
 
 function updateGeneratedURL() {

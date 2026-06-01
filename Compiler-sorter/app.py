@@ -234,8 +234,21 @@ def process_audio_library(extract_path: str, target_path: str, settings: dict) -
 
 @app.route('/')
 def index():
+    """Main landing page."""
+    return send_from_directory('../', 'index.html')
+
+
+@app.route('/companion')
+def companion_page():
     """Main UltraBox companion page."""
     return render_template('ultrabox.html')
+
+
+@app.route('/ultrabox/')
+@app.route('/ultrabox/<path:path>')
+def serve_ultrabox(path='index.html'):
+    """Serve the forked UltraBox editor."""
+    return send_from_directory('../ultrabox', path)
 
 
 @app.route('/compiler')
