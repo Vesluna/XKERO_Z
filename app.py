@@ -22,10 +22,13 @@ os.makedirs(SAMPLE_WORKSPACE, exist_ok=True)
 # Used by the Compiler-Sorter to classify audio files into folders.
 # ---------------------------------------------------------------------------
 INSTRUMENT_TAXONOMY = {
-    "Strings": {
+    "Guitars": {
         "Acoustic Guitar": ["acousticguitar", "acguitar", "steelstring", "nylonstring", "acousticgtr"],
         "Electric Guitar": ["electricguitar", "eguitar", "cleangtr", "distortedguitar", "overdrivegtr", "egtr", "leadgtr", "powerchord", "guitarelectric", "metalguitar", "sillyguitar"],
         "Bass Guitar": ["bassguitar", "electricbass", "pickedbass", "fingeredbass", "fretlessbass", "ebass", "slapbass", "bass", "subbass"],
+        "Generic Guitar": ["guitar", "gtr", "guitarspacechord", "guitarspaceichord", "guitarspacevchord", "guitarvchord", "guitarslap", "stealthpilot guitar"],
+    },
+    "Strings": {
         "Violin": ["violin", "stradivarius", "fiddle", "violins", "violinpizzicato"],
         "Viola": ["viola", "violas"],
         "Cello": ["cello", "violoncello", "cellos", "pizzicato", "cellopizzicato"],
@@ -101,7 +104,7 @@ INSTRUMENT_TAXONOMY = {
     "Foley & Environment": {
         "Nature Elements": ["rain", "wind", "thunder", "water", "ocean", "birds", "fire", "stream", "halloween thunder", "windflying"],
         "Footsteps": ["footsteps", "walk", "run", "gravel", "concrete", "woodstep", "playersit", "boarddrop", "boardollie", "boardstop"],
-        "Mechanical & Tech": ["glitch", "click", "ui", "button", "computer", "machine", "servo", "alarm", "beep", "carhorn", "truckengine", "truckhorn", "hydraulic", "levercompressed", "mechanical", "tech", "beepsound", "beeps", "beepsgps"],
+        "Mechanical & Tech": ["glitch", "click", "button", "computer", "machine", "servo", "alarm", "beep", "carhorn", "truckengine", "truckhorn", "hydraulic", "levercompressed", "mechanical", "tech", "beepsound", "beeps", "beepsgps"],
         "Vinyl & LoFi": ["vinyl", "crackle", "cassette", "tapehiss", "lofi"],
         "General Noise": ["noise", "static", "hiss", "buzz", "hum"],
     },
@@ -109,7 +112,7 @@ INSTRUMENT_TAXONOMY = {
         "Cinematic FX": ["impact", "hit", "boom", "subdrop", "explosion", "subhit", "braam", "orchestrahit", "cinematicboom", "discimpact", "bombexplode"],
         "Transitions": ["riser", "rise", "fall", "downlifter", "sweep", "whoosh", "transition", "uplifter", "swoosh", "reverse"],
         "Textures": ["drone", "texture", "noisefloor", "ambientfx", "atmospherefx", "soundscape"],
-        "Game FX": ["laser", "pew", "zap", "katana", "slash", "energy", "lunge", "rocket", "saber", "sword", "ping", "powerup", "gamefx", "ui", "click", "pop", "incorrect", "correct", "victory", "death", "die", "ouch", "hurl", "kerplunk", "paint", "splat", "rubberband", "sentryshoot", "shortwhistle", "sticky"],
+        "Game FX": ["laser", "pew", "zap", "katana", "slash", "energy", "lunge", "rocket", "saber", "sword", "ping", "powerup", "gamefx", "pop", "incorrect", "correct", "victory", "death", "die", "ouch", "hurl", "kerplunk", "paint", "splat", "rubberband", "sentryshoot", "shortwhistle", "sticky"],
         "Horror FX": ["horror", "ghost", "scream", "scared", "nightmare", "thunder", "lightning", "evil", "woohh"],
         "Miscellaneous FX": ["boing", "chug", "ching", "thump", "splat", "clunk", "collide", "flashbulb", "glassbreak", "pageturn", "ringtone", "switch", "unsheath", "uuhhh"],
     },
@@ -124,6 +127,9 @@ for _category, _folders in INSTRUMENT_TAXONOMY.items():
             KEYWORD_LOOKUP.append((_kw.lower(), _category, _folder_name))
 KEYWORD_LOOKUP.sort(key=lambda x: len(x[0]), reverse=True)
 
+# List of keywords that MUST be matched as whole words to avoid false positives
+# e.g., 'ui' should not match 'Guitar'
+WHOLE_WORD_ONLY = ["ui", "tr", "bd", "ah", "he", "hi", "sd", "sn", "kd"]
 
 def find_matching_instrument(name: str, strict_mode: bool = False):
     """Return (category, folder_name) for the best keyword match, or (None, None)."""
@@ -139,6 +145,9 @@ def find_matching_instrument(name: str, strict_mode: bool = False):
     # Second pass: look for substring matches if not in strict mode
     if not strict_mode:
         for keyword, category, folder_name in KEYWORD_LOOKUP:
+            # Skip short keywords that must be whole words
+            if keyword in WHOLE_WORD_ONLY:
+                continue
             if keyword in name.lower():
                 return category, folder_name
                 
