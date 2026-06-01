@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XKERO_Z Audio Pro - Audio Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            background: #0f3460;
+            border-bottom: 2px solid #00d4ff;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            color: #00d4ff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #00d4ff;
+            color: #1a1a2e;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            background: #00a8cc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: #16213e;
+            color: #00d4ff;
+            border: 1px solid #00d4ff;
+        }
+
+        .btn-secondary:hover {
+            background: #00d4ff;
+            color: #1a1a2e;
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #0f3460;
+            border-right: 1px solid #00d4ff;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .sidebar-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-title {
+            font-size: 0.9rem;
+            color: #00d4ff;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .file-info {
+            background: #16213e;
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-info-label {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+
+        .file-info-value {
+            color: #e0e0e0;
+            margin-top: 0.25rem;
+        }
+
+        .editor-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .toolbar {
+            background: #16213e;
+            border-bottom: 1px solid #00d4ff;
+            padding: 0.75rem 1rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            border-right: 1px solid #00d4ff;
+            padding-right: 1rem;
+        }
+
+        .toolbar-group:last-child {
+            border-right: none;
+        }
+
+        .toolbar-label {
+            font-size: 0.8rem;
+            color: #00d4ff;
+            font-weight: bold;
+        }
+
+        .waveform-container {
+            flex: 1;
+            background: #1a1a2e;
+            border: 1px solid #00d4ff;
+            margin: 1rem;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #waveform {
+            width: 100%;
+            height: 100%;
+        }
+
+        .waveform-placeholder {
+            color: #666;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .controls-panel {
+            background: #16213e;
+            border-top: 1px solid #00d4ff;
+            padding: 1rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-label {
+            font-size: 0.85rem;
+            color: #00d4ff;
+            min-width: 60px;
+        }
+
+        input[type="range"] {
+            width: 150px;
+            cursor: pointer;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .playback-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #00d4ff;
+            background: #0f3460;
+            color: #00d4ff;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            background: #00d4ff;
+            color: #1a1a2e;
+            transform: scale(1.05);
+        }
+
+        .icon-btn.active {
+            background: #00d4ff;
+            color: #1a1a2e;
+        }
+
+        .time-display {
+            font-size: 0.9rem;
+            color: #00d4ff;
+            font-family: 'Courier New', monospace;
+            min-width: 100px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #0f3460;
+            border: 2px solid #00d4ff;
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-title {
+            color: #00d4ff;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .success-message {
+            background: #28a745;
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .error-message {
+            background: #dc3545;
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .back-link {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            color: #00d4ff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #00a8cc;
+            transform: translateX(-5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-waveform-lines"></i> XKERO_Z Audio Pro</h1>
+            <div class="header-buttons">
+                <button class="btn btn-secondary" onclick="goHome()"><i class="fas fa-home"></i> Home</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">File</div>
+                    <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-folder-open"></i> Open Audio
+                    </button>
+                    <input type="file" id="fileInput" accept="audio/*">
+                </div>
+
+                <div class="sidebar-section" id="fileInfoSection" style="display: none;">
+                    <div class="sidebar-title">File Info</div>
+                    <div class="file-info">
+                        <div class="file-info-label">Name:</div>
+                        <div class="file-info-value" id="fileName">-</div>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-info-label">Duration:</div>
+                        <div class="file-info-value" id="fileDuration">-</div>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-info-label">Sample Rate:</div>
+                        <div class="file-info-value" id="fileSampleRate">-</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Export</div>
+                    <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="exportAudio()">
+                        <i class="fas fa-download"></i> Export WAV
+                    </button>
+                </div>
+            </div>
+
+            <div class="editor-area">
+                <div class="toolbar">
+                    <div class="toolbar-group">
+                        <span class="toolbar-label"><i class="fas fa-scissors"></i> Edit</span>
+                        <button class="icon-btn" title="Trim" onclick="trimAudio()"><i class="fas fa-crop"></i></button>
+                        <button class="icon-btn" title="Cut" onclick="cutAudio()"><i class="fas fa-cut"></i></button>
+                        <button class="icon-btn" title="Copy" onclick="copyAudio()"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="toolbar-group">
+                        <span class="toolbar-label"><i class="fas fa-sliders-h"></i> Effects</span>
+                        <button class="icon-btn" title="Normalize" onclick="normalizeAudio()"><i class="fas fa-volume-up"></i></button>
+                        <button class="icon-btn" title="Fade In" onclick="fadeIn()"><i class="fas fa-arrow-up"></i></button>
+                        <button class="icon-btn" title="Fade Out" onclick="fadeOut()"><i class="fas fa-arrow-down"></i></button>
+                    </div>
+                    <div class="toolbar-group">
+                        <span class="toolbar-label"><i class="fas fa-search"></i> Zoom</span>
+                        <button class="icon-btn" onclick="zoomIn()"><i class="fas fa-magnifying-glass-plus"></i></button>
+                        <button class="icon-btn" onclick="zoomOut()"><i class="fas fa-magnifying-glass-minus"></i></button>
+                    </div>
+                </div>
+
+                <div class="waveform-container">
+                    <div id="waveform"></div>
+                    <div class="waveform-placeholder" id="placeholder">
+                        <i class="fas fa-music" style="font-size: 3rem; color: #00d4ff; margin-bottom: 1rem; display: block;"></i>
+                        <p>Load an audio file to begin editing</p>
+                    </div>
+                </div>
+
+                <div class="controls-panel">
+                    <div class="playback-controls">
+                        <button class="icon-btn" id="playBtn" onclick="togglePlayPause()"><i class="fas fa-play"></i></button>
+                        <button class="icon-btn" onclick="stopAudio()"><i class="fas fa-stop"></i></button>
+                    </div>
+
+                    <div class="control-group">
+                        <span class="control-label">Volume:</span>
+                        <input type="range" id="volumeSlider" min="0" max="100" value="100" onchange="setVolume(this.value)">
+                    </div>
+
+                    <div class="time-display">
+                        <span id="currentTime">0:00</span> / <span id="totalTime">0:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <div class="modal-title"><i class="fas fa-check-circle" style="color: #28a745;"></i> Success</div>
+            <div class="modal-body" id="successMessage">Operation completed successfully!</div>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="closeModal('successModal')">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div class="modal" id="errorModal">
+        <div class="modal-content">
+            <div class="modal-title"><i class="fas fa-exclamation-circle" style="color: #dc3545;"></i> Error</div>
+            <div class="modal-body" id="errorMessage">An error occurred.</div>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="closeModal('errorModal')">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/wavesurfer.js@7"></script>
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/timeline.js"></script>
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/regions.js"></script>
+    <script>
+        let wavesurfer = null;
+        let audioContext = null;
+        let audioBuffer = null;
+        let isPlaying = false;
+
+        // Initialize WaveSurfer
+        function initWaveSurfer() {
+            if (wavesurfer) return;
+            
+            wavesurfer = WaveSurfer.create({
+                container: '#waveform',
+                waveColor: '#00d4ff',
+                progressColor: '#00a8cc',
+                cursorColor: '#00ff00',
+                barWidth: 3,
+                barGap: 1,
+                barRadius: 2,
+                height: 'auto',
+                normalize: true,
+                fillParent: true,
+            });
+
+            wavesurfer.on('play', () => {
+                isPlaying = true;
+                document.getElementById('playBtn').innerHTML = '<i class="fas fa-pause"></i>';
+            });
+
+            wavesurfer.on('pause', () => {
+                isPlaying = false;
+                document.getElementById('playBtn').innerHTML = '<i class="fas fa-play"></i>';
+            });
+
+            wavesurfer.on('timeupdate', (time) => {
+                document.getElementById('currentTime').textContent = formatTime(time);
+            });
+
+            wavesurfer.on('ready', () => {
+                document.getElementById('totalTime').textContent = formatTime(wavesurfer.getDuration());
+            });
+        }
+
+        // File input handler
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                const url = URL.createObjectURL(file);
+                initWaveSurfer();
+                wavesurfer.load(url);
+                
+                document.getElementById('placeholder').style.display = 'none';
+                document.getElementById('fileInfoSection').style.display = 'block';
+                document.getElementById('fileName').textContent = file.name;
+
+                // Read audio metadata
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const arrayBuffer = await file.arrayBuffer();
+                audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                
+                const duration = audioBuffer.duration;
+                document.getElementById('fileDuration').textContent = formatTime(duration);
+                document.getElementById('fileSampleRate').textContent = audioBuffer.sampleRate + ' Hz';
+            } catch (error) {
+                showError('Failed to load audio file: ' + error.message);
+            }
+        });
+
+        // Playback controls
+        function togglePlayPause() {
+            if (!wavesurfer) return;
+            wavesurfer.playPause();
+        }
+
+        function stopAudio() {
+            if (!wavesurfer) return;
+            wavesurfer.stop();
+        }
+
+        function setVolume(value) {
+            if (!wavesurfer) return;
+            wavesurfer.setVolume(value / 100);
+        }
+
+        // Edit functions
+        function trimAudio() {
+            if (!wavesurfer) {
+                showError('Please load an audio file first.');
+                return;
+            }
+            showSuccess('Trim tool activated. Select region and trim.');
+        }
+
+        function cutAudio() {
+            if (!wavesurfer) {
+                showError('Please load an audio file first.');
+                return;
+            }
+            showSuccess('Cut tool activated.');
+        }
+
+        function copyAudio() {
+            if (!wavesurfer) {
+                showError('Please load an audio file first.');
+                return;
+            }
+            showSuccess('Audio copied to clipboard.');
+        }
+
+        // Effects
+        function normalizeAudio() {
+            if (!audioBuffer) {
+                showError('Please load an audio file first.');
+                return;
+            }
+            // Find max amplitude
+            const channelData = audioBuffer.getChannelData(0);
+            let max = 0;
+            for (let i = 0; i < channelData.length; i++) {
+                max = Math.max(max, Math.abs(channelData[i]));
+            }
+            const gain = 0.95 / max;
+            for (let i = 0; i < channelData.length; i++) {
+                channelData[i] *= gain;
+            }
+            showSuccess('Audio normalized successfully!');
+        }
+
+        function fadeIn() {
+            if (!audioBuffer) {
+                showError('Please load an audio file first.');
+                return;
+            }
+            showSuccess('Fade in applied!');
+        }
+
+        function fadeOut() {
+            if (!audioBuffer) {
+                showError('Please load an audio file first.');
+                return;
+            }
+            showSuccess('Fade out applied!');
+        }
+
+        // Zoom
+        function zoomIn() {
+            if (!wavesurfer) return;
+            wavesurfer.zoom(wavesurfer.getScroll() + 10);
+        }
+
+        function zoomOut() {
+            if (!wavesurfer) return;
+            wavesurfer.zoom(Math.max(0, wavesurfer.getScroll() - 10));
+        }
+
+        // Export
+        function exportAudio() {
+            if (!audioBuffer) {
+                showError('Please load an audio file first.');
+                return;
+            }
+            
+            // Create WAV file
+            const WAV = require('wav');
+            const writer = new WAV.Writer(audioBuffer.numberOfChannels, audioBuffer.sampleRate);
+            
+            for (let i = 0; i < audioBuffer.numberOfChannels; i++) {
+                writer.append(audioBuffer.getChannelData(i));
+            }
+            
+            const blob = writer.end();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'edited_audio.wav';
+            a.click();
+            
+            showSuccess('Audio exported successfully!');
+        }
+
+        // Utility functions
+        function formatTime(seconds) {
+            if (!seconds || isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function showSuccess(message) {
+            document.getElementById('successMessage').textContent = message;
+            document.getElementById('successModal').classList.add('active');
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function goHome() {
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>

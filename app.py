@@ -260,6 +260,11 @@ def compiler_page():
     """Audio library compiler / sorter tool."""
     return render_template('sample-compiler.html')
 
+@app.route('/audio-pro')
+def audio_pro_page():
+    """XKERO_Z Audio Pro - Advanced audio editor."""
+    return render_template('audio-pro.html')
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     """Handle ZIP upload and start processing."""
