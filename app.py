@@ -24,11 +24,11 @@ os.makedirs(SAMPLE_WORKSPACE, exist_ok=True)
 INSTRUMENT_TAXONOMY = {
     "Strings": {
         "Acoustic Guitar": ["acousticguitar", "acguitar", "steelstring", "nylonstring", "acousticgtr"],
-        "Electric Guitar": ["electricguitar", "eguitar", "cleangtr", "distortedguitar", "overdrivegtr", "egtr", "leadgtr", "powerchord"],
+        "Electric Guitar": ["electricguitar", "eguitar", "cleangtr", "distortedguitar", "overdrivegtr", "egtr", "leadgtr", "powerchord", "guitarelectric"],
         "Bass Guitar": ["bassguitar", "electricbass", "pickedbass", "fingeredbass", "fretlessbass", "ebass", "slapbass", "bass", "subbass"],
         "Violin": ["violin", "stradivarius", "fiddle", "violins"],
         "Viola": ["viola", "violas"],
-        "Cello": ["cello", "violoncello", "cellos", "pizzicato"],
+        "Cello": ["cello", "violoncello", "cellos", "pizzicato", "cellopizzicato"],
         "Double Bass": ["doublebass", "contrabass", "uprightbass", "standupbass"],
         "Harp": ["harp", "lyre", "celticharp"],
         "Banjo": ["banjo", "banjos"],
@@ -37,7 +37,7 @@ INSTRUMENT_TAXONOMY = {
         "Generic Strings": ["strings", "stringensemble", "orchestralstrings", "staccatostrings", "pizzicato", "arco", "synthstrings", "string"],
     },
     "Woodwinds": {
-        "Flute": ["flute", "piccolo", "panflute", "panpipes", "westernflute", "shakuhachi"],
+        "Flute": ["flute", "piccolo", "panflute", "panpipes", "westernflute", "shakuhachi", "flutesound"],
         "Oboe": ["oboe", "englishhorn", "hautbois"],
         "Clarinet": ["clarinet", "bassclarinet"],
         "Bassoon": ["bassoon", "contrabassoon"],
@@ -46,29 +46,29 @@ INSTRUMENT_TAXONOMY = {
         "Generic Woodwinds": ["woodwind", "reed", "windinstrument", "woodwinds"],
     },
     "Brass": {
-        "Trumpet": ["trumpet", "cornet", "flugelhorn", "piccolotrumpet", "tr"],
-        "Trombone": ["trombone", "basstrombone", "valvetrombone"],
+        "Trumpet": ["trumpet", "cornet", "flugelhorn", "piccolotrumpet", "tr", "trumpet"],
+        "Trombone": ["trombone", "basstrombone", "valvetrombone", "trombone"],
         "Tuba": ["tuba", "sousaphone", "euphonium"],
         "French Horn": ["frenchhorn", "horn", "orchestralhorn", "horns"],
-        "Generic Brass": ["brass", "brasssection", "brasshorns", "brassensemble", "hornsection", "stabs"],
+        "Generic Brass": ["brass", "brasssection", "brasshorns", "brassensemble", "hornsection", "stabs", "brassstab", "brasstone"],
     },
     "Percussion & Drums": {
-        "Kick Drum": ["kick", "bassdrum", "kickdrum", "bdrum", "subkick", "punch", "bd"],
-        "Snare Drum": ["snare", "snaredrum", "sdrum", "rimshot", "rim", "ghostnote", "sd"],
-        "Hi-Hat": ["hihat", "hats", "openhat", "closedhat", "cymbalhat", "pedalhat", "hat"],
+        "Kick Drum": ["kick", "bassdrum", "kickdrum", "bdrum", "subkick", "punch", "bd", "kick_orchestra_hit", "tom_kick"],
+        "Snare Drum": ["snare", "snaredrum", "sdrum", "rimshot", "rim", "ghostnote", "sd", "snare_cymbal", "snare_drum"],
+        "Hi-Hat": ["hihat", "hats", "openhat", "closedhat", "cymbalhat", "pedalhat", "hat", "hi_hat"],
         "Tom Tom": ["tom", "tomtom", "floortom", "racktom", "toms"],
-        "Cymbals": ["cymbal", "crash", "ride", "splash", "chinacym", "gong", "cymbals"],
+        "Cymbals": ["cymbal", "crash", "ride", "splash", "chinacym", "gong", "cymbals", "reverse_cymbal", "low_cymbal"],
         "Clap & Snap": ["clap", "handclap", "snap", "fingersnap", "claps"],
         "Cowbell": ["cowbell", "woodblock", "agogobell", "jamblock"],
         "Timpani": ["timpani", "kettledrum", "timp"],
-        "Latin Percussion": ["conga", "bongo", "timbale", "cajon", "djembe", "cuica", "clave"],
+        "Latin Percussion": ["conga", "bongo", "timbale", "cajon", "djembe", "cuica", "clave", "bongohigh", "bongolow"],
         "Shakers & Toys": ["shaker", "cabasa", "maraca", "tambourine", "guiro", "triangleperc", "fingercym"],
-        "Electronic Drums": ["808", "909", "707", "linndrum", "electronicperc", "synthdrum", "drummachine", "drum"],
+        "Electronic Drums": ["808", "909", "707", "linndrum", "electronicperc", "synthdrum", "drummachine", "drum", "beat"],
     },
     "Chromatic & Mallets": {
-        "Bells": ["bell", "bells", "glockenspiel", "tubularbells", "handbells", "carillon", "orchestralbells", "agogo", "jingle", "tubularbell"],
+        "Bells": ["bell", "bells", "glockenspiel", "tubularbells", "handbells", "carillon", "orchestralbells", "agogo", "jingle", "tubularbell", "bells"],
         "Chimes": ["chime", "chimes", "windchimes", "barchimes"],
-        "Marimba & Xylophone": ["marimba", "xylophone", "vibaphone", "balafon", "xylo", "vibes"],
+        "Marimba & Xylophone": ["marimba", "xylophone", "vibraphone", "balafon", "xylo", "vibes", "icyxylophone"],
         "Music Box": ["musicbox", "spieluhr", "lullaby"],
     },
     "Keyboards & Synths": {
@@ -80,10 +80,10 @@ INSTRUMENT_TAXONOMY = {
         "Synth Leads": ["lead", "synthlead", "monolead", "sawlead", "squarelead", "glide", "rublead"],
         "Synth Pads": ["pad", "synthpad", "ambientpad", "stringpad", "atmosphere", "pads"],
         "Synth Plucks": ["pluck", "synthpluck", "staccatosynth", "plucks", "malletsynth"],
-        "Synth Bass": ["synthbass", "subbass", "sub", "wobblebass", "acidbass", "303", "reese", "808bass", "donk", "spitsybass"],
+        "Synth Bass": ["synthbass", "subbass", "sub", "wobblebass", "acidbass", "303", "reese", "808bass", "donk", "spitsybass", "moonchargebass"],
         "Chiptune & Waves": ["chiptune", "nes", "gameboy", "squarewave", "sawwave", "trianglewave", "sinewave", "pulsewave", "noise", "2bit", "4bit", "8bit", "16bit", "waveform", "sid", "ym2612", "chipping", "rezsqr"],
         "Mellotron": ["mellotron", "stringsynth", "tronflute"],
-        "Generic Synths": ["synth", "synthesizer", "syn"],
+        "Generic Synths": ["synth", "synthesizer", "syn", "square synth", "smooth synth", "main synth"],
     },
     "World & Traditional": {
         "Sitar & Tanpura": ["sitar", "tanpura", "tambura"],
@@ -96,18 +96,22 @@ INSTRUMENT_TAXONOMY = {
     "Vocals": {
         "Choir": ["choir", "chorus", "gospelchoir", "vocalensemble", "chants", "gregorian"],
         "Vocal Loops": ["vocalloop", "acapella", "vocalphrase", "vocalhook", "vocalchop"],
-        "Vocal FX": ["vocalfx", "chant", "adlib", "grunt", "shout", "vox", "beatbox", "breath", "ah", "heeyy"],
+        "Vocal FX": ["vocalfx", "chant", "adlib", "grunt", "shout", "vox", "beatbox", "breath", "ah", "heeyy", "ooh", "ugh", "laugh", "meow", "wooh"],
     },
     "Foley & Environment": {
         "Nature Elements": ["rain", "wind", "thunder", "water", "ocean", "birds", "fire", "stream"],
         "Footsteps": ["footsteps", "walk", "run", "gravel", "concrete", "woodstep"],
-        "Mechanical & Tech": ["glitch", "click", "ui", "button", "computer", "machine", "servo", "alarm", "beep"],
+        "Mechanical & Tech": ["glitch", "click", "ui", "button", "computer", "machine", "servo", "alarm", "beep", "carhorn", "truckengine", "truckhorn", "hydraulic", "levercompressed", "mechanical", "tech"],
         "Vinyl & LoFi": ["vinyl", "crackle", "cassette", "tapehiss", "lofi"],
+        "General Noise": ["noise", "static", "hiss", "buzz", "hum"],
     },
     "Sound Design & FX": {
-        "Cinematic FX": ["impact", "hit", "boom", "subdrop", "explosion", "subhit", "braam", "orchestrahit"],
+        "Cinematic FX": ["impact", "hit", "boom", "subdrop", "explosion", "subhit", "braam", "orchestrahit", "cinematicboom", "discimpact", "bombexplode"],
         "Transitions": ["riser", "rise", "fall", "downlifter", "sweep", "whoosh", "transition", "uplifter", "swoosh", "reverse"],
         "Textures": ["drone", "texture", "noisefloor", "ambientfx", "atmospherefx", "soundscape"],
+        "Game FX": ["laser", "pew", "zap", "katana", "slash", "energy", "lunge", "rocket", "saber", "sword", "ping", "powerup", "gamefx", "ui", "click", "pop", "incorrect", "correct", "victory", "death", "die", "ouch", "hurl", "kerplunk", "paint", "splat", "rubberband", "sentryshoot", "shortwhistle", "sticky"],
+        "Horror FX": ["horror", "ghost", "scream", "scared", "nightmare", "thunder", "lightning", "evil", "woohh"],
+        "Miscellaneous FX": ["boing", "chug", "ching", "thump", "splat", "clunk", "collide", "flashbulb", "glassbreak", "pageturn", "ringtone", "switch", "unsheath", "uuhhh"],
     },
 }
 
@@ -214,7 +218,8 @@ def process_audio_library(extract_path: str, target_path: str, settings: dict) -
             elif settings['isolate_misc']:
                 dest_dir = os.path.join(target_path, "Miscellaneous")
             else:
-                dest_dir = os.path.join(target_path, "Uncategorized")
+                # If isolate_misc is false, uncategorized files go to the root of the processed folder
+                dest_dir = target_path
 
             os.makedirs(dest_dir, exist_ok=True)
             # Avoid overwriting files with identical names from different folders
