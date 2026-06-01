@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample Compiler - XKERO_Z</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #0f1419;
+            color: #e2e8f0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            font-size: 1rem;
+            opacity: 0.95;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #4299e1;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover {
+            color: #63b3ed;
+        }
+        .upload-zone {
+            border: 3px dashed #4299e1;
+            border-radius: 0.5rem;
+            padding: 3rem;
+            text-align: center;
+            background-color: rgba(66, 153, 225, 0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .upload-zone.dragover {
+            border-color: #63b3ed;
+            background-color: rgba(99, 179, 237, 0.1);
+            transform: scale(1.02);
+        }
+        .upload-zone input {
+            display: none;
+        }
+        .upload-zone i {
+            font-size: 3rem;
+            color: #4299e1;
+            margin-bottom: 1rem;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background-color: #4299e1;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #3182ce;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
+        }
+        .btn-secondary {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            border: 1px solid #4a5568;
+        }
+        .btn-secondary:hover {
+            background-color: #4a5568;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .setting-item {
+            background-color: #2d3748;
+            padding: 1.5rem;
+            border-radius: 0.375rem;
+            border-left: 4px solid #4299e1;
+        }
+        .setting-item label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #cbd5e0;
+        }
+        .setting-item input[type="checkbox"] {
+            cursor: pointer;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background-color: #2d3748;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        .modal-header {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .modal-body {
+            margin-bottom: 1.5rem;
+            color: #cbd5e0;
+            line-height: 1.6;
+        }
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        .status-success {
+            background-color: rgba(72, 187, 120, 0.2);
+            color: #68d391;
+        }
+        .status-error {
+            background-color: rgba(245, 101, 101, 0.2);
+            color: #fc8181;
+        }
+        .status-warning {
+            background-color: rgba(237, 137, 54, 0.2);
+            color: #f6ad55;
+        }
+        .file-tree {
+            background-color: #1a202c;
+            border-radius: 0.375rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .file-tree-item {
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            background-color: #2d3748;
+            border-radius: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .file-tree-item.folder {
+            color: #4299e1;
+        }
+        .file-tree-item.file {
+            color: #a0aec0;
+            padding-left: 2rem;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #2d3748;
+            border-radius: 9999px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <a href="/" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Tools
+        </a>
+
+        <div class="header">
+            <h1><i class="fas fa-compact-disc"></i> Sample Compiler</h1>
+            <p>Organize your audio library into a structured, categorized format</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Upload Area -->
+            <div class="lg:col-span-2">
+                <div class="upload-zone" id="uploadZone">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3 class="text-xl font-semibold mb-2">Drag & Drop Your ZIP File</h3>
+                    <p class="text-gray-400 mb-4">or click to select a file</p>
+                    <input type="file" id="fileInput" accept=".zip" />
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-folder-open"></i> Select File
+                    </button>
+                </div>
+
+                <!-- Settings -->
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label for="nestedAction">
+                            <i class="fas fa-layer-group"></i> Nested ZIPs
+                        </label>
+                        <select id="nestedAction" class="w-full bg-1a202c text-white p-2 rounded mt-2 border border-4a5568">
+                            <option value="extract">Extract</option>
+                            <option value="delete">Delete</option>
+                            <option value="ignore">Ignore</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label for="sortSF2">
+                            <input type="checkbox" id="sortSF2" /> Sort SF2 Files Alphabetically
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label for="isolateMisc">
+                            <input type="checkbox" id="isolateMisc" checked /> Isolate Miscellaneous
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Compile Button -->
+                <button class="btn btn-primary w-full text-lg" id="compileBtn" onclick="compileLibrary()">
+                    <i class="fas fa-cog"></i> Compile Library
+                </button>
+
+                <!-- Progress Bar -->
+                <div class="progress-bar" id="progressBar" style="display: none;">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <!-- Info Panel -->
+            <div class="bg-2d3748 rounded-lg p-6 h-fit">
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <i class="fas fa-info-circle text-4299e1"></i> How It Works
+                </h3>
+                <ul class="space-y-3 text-sm text-gray-400">
+                    <li><strong>1. Upload:</strong> Select a ZIP file with your audio samples</li>
+                    <li><strong>2. Configure:</strong> Choose how to handle nested files and SF2 soundfonts</li>
+                    <li><strong>3. Compile:</strong> Click the compile button to organize your library</li>
+                    <li><strong>4. Download:</strong> Get your organized library as a ZIP file</li>
+                </ul>
+                <div class="mt-6 p-4 bg-1a202c rounded border-l-4 border-4299e1">
+                    <p class="text-xs text-gray-500">
+                        <strong>Supported Formats:</strong> WAV, MP3, FLAC, AIFF, OGG, SF2
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Explorer -->
+        <div id="explorerContainer" style="display: none;">
+            <h2 class="text-2xl font-bold mt-8 mb-4">
+                <i class="fas fa-folder-open text-4299e1"></i> Compiled Library
+            </h2>
+            <div class="file-tree" id="fileTree"></div>
+            <button class="btn btn-primary mt-4" id="downloadBtn" onclick="downloadLibrary()">
+                <i class="fas fa-download"></i> Download Compiled ZIP
+            </button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="warningModal">
+        <div class="modal-content">
+            <div class="modal-header" style="color: #f6ad55;">
+                <i class="fas fa-exclamation-triangle"></i> Warning
+            </div>
+            <div class="modal-body" id="warningText"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('warningModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="proceedWithWarning()">Continue Anyway</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <div class="modal-header" style="color: #68d391;">
+                <i class="fas fa-check-circle"></i> Success
+            </div>
+            <div class="modal-body" id="successText"></div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('successModal')">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="errorModal">
+        <div class="modal-content">
+            <div class="modal-header" style="color: #fc8181;">
+                <i class="fas fa-times-circle"></i> Error
+            </div>
+            <div class="modal-body" id="errorText"></div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('errorModal')">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        let selectedFile = null;
+
+        // Drag and drop
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                selectedFile = files[0];
+                updateUploadZoneText();
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            selectedFile = e.target.files[0];
+            updateUploadZoneText();
+        });
+
+        function updateUploadZoneText() {
+            if (selectedFile) {
+                uploadZone.innerHTML = `<i class="fas fa-check-circle" style="color: #68d391;"></i><p class="text-lg font-semibold text-68d391">${selectedFile.name}</p><p class="text-gray-400">Ready to compile</p>`;
+            }
+        }
+
+        function compileLibrary() {
+            if (!selectedFile) {
+                showError('Please select a ZIP file first');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('nested_action', document.getElementById('nestedAction').value);
+            formData.append('sort_sf2', document.getElementById('sortSF2').checked);
+            formData.append('isolate_misc', document.getElementById('isolateMisc').checked);
+
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            progressBar.style.display = 'block';
+            progressFill.style.width = '0%';
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                progressFill.style.width = '100%';
+                if (!response.ok) throw new Error('Upload failed');
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    showSuccess(`Compiled successfully! ${data.file_count} files processed.`);
+                    loadFileExplorer(data.folder_id);
+                } else {
+                    showError(data.error || 'Compilation failed');
+                }
+            })
+            .catch(error => {
+                showError(error.message);
+                progressBar.style.display = 'none';
+            });
+        }
+
+        function loadFileExplorer(folderId) {
+            fetch(`/api/explore/${folderId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const fileTree = document.getElementById('fileTree');
+                    fileTree.innerHTML = buildFileTree(data.tree);
+                    document.getElementById('explorerContainer').style.display = 'block';
+                    window.currentFolderId = folderId;
+                })
+                .catch(error => showError('Failed to load file explorer'));
+        }
+
+        function buildFileTree(tree, level = 0) {
+            let html = '';
+            for (const [key, value] of Object.entries(tree)) {
+                if (typeof value === 'object') {
+                    html += `<div class="file-tree-item folder" style="padding-left: ${level * 1.5}rem;">
+                        <i class="fas fa-folder"></i> ${key}
+                    </div>`;
+                    html += buildFileTree(value, level + 1);
+                } else {
+                    html += `<div class="file-tree-item file" style="padding-left: ${level * 1.5}rem;">
+                        <i class="fas fa-file-audio"></i> ${key}
+                    </div>`;
+                }
+            }
+            return html;
+        }
+
+        function downloadLibrary() {
+            if (window.currentFolderId) {
+                window.location.href = `/download/${window.currentFolderId}`;
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('errorModal').classList.add('active');
+        }
+
+        function showSuccess(message) {
+            document.getElementById('successText').textContent = message;
+            document.getElementById('successModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function proceedWithWarning() {
+            closeModal('warningModal');
+            // Continue with compilation
+        }
+    </script>
+</body>
+</html>
