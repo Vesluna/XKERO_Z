@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XKERO_Z — UltraBox Companion & Sample Compiler</title>
+    <style>
+        :root {
+            --bg:     #05070b;
+            --panel:  #0e131a;
+            --border: #21262d;
+            --accent: #2ea44f;
+            --blue:   #58a6ff;
+            --text:   #f0f6fc;
+            --muted:  #8b949e;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .hero {
+            text-align: center;
+            max-width: 700px;
+        }
+        .logo {
+            font-size: 2.4rem;
+            font-weight: bold;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+        }
+        .logo span { color: var(--accent); }
+        .tagline {
+            color: var(--muted);
+            font-size: 1rem;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        .cards {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px 28px;
+            width: 280px;
+            text-align: left;
+        }
+        .card h3 { margin: 0 0 10px 0; font-size: 1rem; color: var(--accent); }
+        .card p  { margin: 0; font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+        .btn-row {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            transition: opacity 0.15s;
+        }
+        .btn:hover { opacity: 0.85; }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-secondary { background: var(--panel); border: 1px solid var(--border); color: var(--blue); }
+        .note {
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: var(--muted);
+            max-width: 560px;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .note a { color: var(--blue); }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="logo">XKERO_Z <span>//</span> UltraBox Companion</div>
+        <p class="tagline">
+            A two-part toolkit for <a href="https://ultraabox.github.io/" style="color:var(--blue)">UltraBox</a> —
+            the open-source chiptune tracker and sampler.<br>
+            Manage custom sample URLs and sort your audio libraries with ease.
+        </p>
+
+        <div class="cards">
+            <div class="card">
+                <h3>🎵 UltraBox Companion</h3>
+                <p>Embed the UltraBox editor, build custom sample URL lists, and open them in UltraBox with one click. Persists your URLs in localStorage.</p>
+            </div>
+            <div class="card">
+                <h3>⚙ Sample Compiler</h3>
+                <p>Upload a ZIP of audio files. The compiler classifies them into a structured folder hierarchy by instrument type and packages them for download.</p>
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <a href="https://ultraabox.github.io/" class="btn btn-primary" target="_blank">Open UltraBox ↗</a>
+            <a href="https://github.com/XKERO-Z/XKERO_Z" class="btn btn-secondary" target="_blank">View on GitHub ↗</a>
+        </div>
+
+        <p class="note">
+            The Companion &amp; Compiler require a local Python/Flask server to run.
+            See the <a href="https://github.com/XKERO-Z/XKERO_Z#readme">README</a> for setup instructions.
+            UltraBox itself runs entirely in your browser — no server needed.
+        </p>
+    </div>
+</body>
+</html>

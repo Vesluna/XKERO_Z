@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XKERO_Z // UltraBox Companion</title>
+    <style>
+        /* ── Design tokens ─────────────────────────────────────────────── */
+        :root {
+            --bg:          #05070b;
+            --panel:       #0e131a;
+            --border:      #21262d;
+            --border-hi:   #30363d;
+            --accent:      #2ea44f;
+            --accent-dark: #238636;
+            --blue:        #3182ce;
+            --blue-hi:     #58a6ff;
+            --text:        #f0f6fc;
+            --muted:       #8b949e;
+            --red:         #da3637;
+            --yellow:      #d9b626;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Header ────────────────────────────────────────────────────── */
+        header {
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.25rem;
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+        header h1 span { color: var(--accent); }
+
+        .header-tools {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-left: auto;
+        }
+
+        /* ── Tabs ───────────────────────────────────────────────────────── */
+        .tab-bar {
+            display: flex;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            gap: 4px;
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 10px 18px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        /* ── Tab panels ─────────────────────────────────────────────────── */
+        .tab-panel { display: none; flex: 1; flex-direction: column; }
+        .tab-panel.active { display: flex; }
+
+        /* ── UltraBox embed panel ───────────────────────────────────────── */
+        #panel-ultrabox {
+            flex: 1;
+            position: relative;
+        }
+        #ultrabox-frame {
+            width: 100%;
+            height: calc(100vh - 112px);
+            border: none;
+            display: block;
+            background: #000;
+        }
+        .frame-overlay-msg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        /* ── Sample URL Manager panel ───────────────────────────────────── */
+        #panel-samples {
+            padding: 24px;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .section-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px 20px;
+        }
+        .section-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--blue);
+            margin: 0 0 14px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* URL adder */
+        .url-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .url-row input[type="text"] {
+            flex: 1;
+            background: #0d1117;
+            border: 1px solid var(--border-hi);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        .url-row input[type="text"]:focus { border-color: var(--accent); }
+
+        /* Sample list */
+        #sample-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+        #sample-list li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 6px 10px;
+            font-size: 0.82rem;
+        }
+        #sample-list li .sample-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--blue-hi);
+        }
+        #sample-list li .sample-url {
+            flex: 2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--muted);
+            font-size: 0.75rem;
+        }
+
+        /* Generated URL output */
+        #generated-url-box {
+            background: #0d1117;
+            border: 1px solid var(--border-hi);
+            border-radius: 5px;
+            padding: 10px 14px;
+            font-size: 0.8rem;
+            color: var(--accent);
+            word-break: break-all;
+            min-height: 48px;
+            margin-bottom: 10px;
+            font-family: monospace;
+        }
+
+        /* ── Import panel ───────────────────────────────────────────────── */
+        #panel-import {
+            padding: 24px;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .import-drop-zone {
+            border: 2px dashed var(--border-hi);
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        .import-drop-zone:hover,
+        .import-drop-zone.dragover {
+            border-color: var(--accent);
+            background: rgba(46, 164, 79, 0.07);
+            color: var(--text);
+        }
+        .import-drop-zone input { display: none; }
+
+        #import-status {
+            font-size: 0.85rem;
+            padding: 10px 14px;
+            border-radius: 5px;
+            display: none;
+        }
+        #import-status.ok  { background: rgba(46,164,79,0.15); color: var(--accent); border: 1px solid var(--accent-dark); }
+        #import-status.err { background: rgba(218,54,55,0.15); color: var(--red);    border: 1px solid var(--red); }
+        #import-status.inf { background: rgba(49,130,206,0.15); color: var(--blue-hi); border: 1px solid var(--blue); }
+
+        /* Imported sample tree */
+        #imported-tree {
+            font-size: 0.82rem;
+            max-height: 380px;
+            overflow-y: auto;
+        }
+        .tree-category { color: var(--text); font-weight: bold; margin-top: 10px; cursor: pointer; user-select: none; }
+        .tree-instrument { padding-left: 14px; color: var(--muted); margin: 3px 0; }
+        .tree-sample {
+            padding-left: 28px;
+            color: var(--blue-hi);
+            cursor: pointer;
+            margin: 2px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tree-sample:hover { text-decoration: underline; }
+        .tree-sample .play-dot {
+            width: 8px; height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: none;
+        }
+        .tree-sample.playing .play-dot { display: block; }
+
+        /* ── Shared button styles ───────────────────────────────────────── */
+        .btn {
+            background: var(--border-hi);
+            color: var(--text);
+            border: 1px solid #484f58;
+            padding: 7px 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            transition: background 0.15s, box-shadow 0.15s;
+            white-space: nowrap;
+        }
+        .btn:hover { background: #3a424d; }
+        .btn.primary { background: var(--accent); border-color: var(--accent-dark); color: #fff; }
+        .btn.primary:hover { background: var(--accent-dark); box-shadow: 0 0 10px rgba(46,164,79,0.4); }
+        .btn.blue { background: var(--blue); border-color: #2563a8; color: #fff; }
+        .btn.blue:hover { background: #2563a8; }
+        .btn.danger { background: var(--red); border-color: #b02a2b; color: #fff; }
+        .btn.danger:hover { background: #b02a2b; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* ── Inline audio player ────────────────────────────────────────── */
+        #preview-player {
+            width: 100%;
+            margin-top: 12px;
+            border-radius: 4px;
+            outline: none;
+            display: none;
+        }
+
+        /* ── Footer ─────────────────────────────────────────────────────── */
+        footer {
+            background: #0b0e14;
+            border-top: 1px solid var(--border);
+            padding: 18px 24px;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+        .footer-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .footer-inner a { color: var(--blue-hi); text-decoration: none; }
+        .footer-inner a:hover { text-decoration: underline; }
+
+        /* ── Responsive ─────────────────────────────────────────────────── */
+        @media (max-width: 640px) {
+            #ultrabox-frame { height: calc(100vh - 140px); }
+            .url-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────── -->
+<header>
+    <h1>XKERO_Z <span>//</span> UltraBox Companion</h1>
+    <div class="header-tools">
+        <a href="/compiler" class="btn">⚙ Sample Compiler</a>
+        <a href="https://ultraabox.github.io/" target="_blank" class="btn primary">Open UltraBox ↗</a>
+    </div>
+</header>
+
+<!-- ── Tab bar ─────────────────────────────────────────────────────────── -->
+<div class="tab-bar">
+    <button class="tab-btn active" data-tab="ultrabox">UltraBox Editor</button>
+    <button class="tab-btn" data-tab="samples">Sample URL Manager</button>
+    <button class="tab-btn" data-tab="import">Import Sorted Pack</button>
+</div>
+
+<!-- ── Tab: UltraBox Editor ────────────────────────────────────────────── -->
+<div class="tab-panel active" id="panel-ultrabox">
+    <div class="frame-overlay-msg" id="frame-loading-msg">Loading UltraBox…</div>
+    <iframe
+        id="ultrabox-frame"
+        src="https://ultraabox.github.io/"
+        title="UltraBox Music Editor"
+        allow="autoplay"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
+        loading="lazy"
+    ></iframe>
+</div>
+
+<!-- ── Tab: Sample URL Manager ─────────────────────────────────────────── -->
+<div class="tab-panel" id="panel-samples">
+
+    <div class="section-card">
+        <h3 class="section-title">How UltraBox Custom Samples Work</h3>
+        <p style="font-size:0.85rem; color:var(--muted); margin:0 0 10px 0; line-height:1.6;">
+            UltraBox loads custom samples from <strong>public CORS-enabled URLs</strong> (e.g. hosted on
+            <a href="https://filegarden.com/" target="_blank" style="color:var(--blue-hi)">File Garden</a> or
+            <a href="https://catbox.moe/" target="_blank" style="color:var(--blue-hi)">Catbox</a>).
+            Add your sample URLs below, then click <em>Open in UltraBox</em> to launch the editor with those
+            samples pre-loaded. Inside UltraBox, go to <strong>Edit → Add Custom Samples…</strong> and paste
+            the URL if you prefer to add them manually.
+        </p>
+    </div>
+
+    <div class="section-card">
+        <h3 class="section-title">Add Sample URLs</h3>
+        <div class="url-row">
+            <input type="text" id="new-sample-url" placeholder="https://files.catbox.moe/xxxxxx.wav" />
+            <input type="text" id="new-sample-name" placeholder="Label (optional)" style="max-width:180px;" />
+            <button class="btn primary" id="add-sample-btn">Add</button>
+        </div>
+        <ul id="sample-list">
+            <li style="color:var(--muted); font-style:italic; border:none; background:none; padding:4px 0;">
+                No samples added yet.
+            </li>
+        </ul>
+        <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+            <button class="btn danger" id="clear-samples-btn">Clear All</button>
+            <button class="btn" id="export-list-btn">Export List (JSON)</button>
+            <button class="btn" id="import-list-btn">Import List (JSON)</button>
+            <input type="file" id="import-list-file" accept=".json" style="display:none;">
+        </div>
+    </div>
+
+    <div class="section-card">
+        <h3 class="section-title">Open in UltraBox</h3>
+        <p style="font-size:0.85rem; color:var(--muted); margin:0 0 10px 0; line-height:1.6;">
+            The generated URL below encodes all your sample URLs into the UltraBox link.
+            Click <em>Open in Editor Tab</em> to reload the embedded editor with your samples,
+            or <em>Open in New Tab</em> to use UltraBox directly.
+        </p>
+        <div id="generated-url-box">Add at least one sample URL above to generate a link.</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn primary" id="open-in-frame-btn" disabled>Open in Editor Tab</button>
+            <button class="btn blue" id="open-in-newtab-btn" disabled>Open in New Tab ↗</button>
+            <button class="btn" id="copy-url-btn" disabled>Copy URL</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── Tab: Import Sorted Pack ──────────────────────────────────────────── -->
+<div class="tab-panel" id="panel-import">
+
+    <div class="section-card">
+        <h3 class="section-title">Import a Sorted Sample Pack</h3>
+        <p style="font-size:0.85rem; color:var(--muted); margin:0 0 14px 0; line-height:1.6;">
+            Upload a ZIP produced by the <a href="/compiler" style="color:var(--blue-hi)">Sample Compiler</a>.
+            Audio files (WAV, MP3, FLAC, AIFF, OGG) will be extracted and made available for preview below.
+            SF2 soundfonts are intentionally skipped — use them directly in a DAW or soundfont player.
+        </p>
+
+        <label class="import-drop-zone" id="drop-zone" for="import-file-input">
+            <div style="font-size:2rem; margin-bottom:8px;">📦</div>
+            <strong>Drag &amp; Drop a sorted .ZIP here</strong><br>
+            <span style="font-size:0.8rem;">or click to browse</span>
+            <input type="file" id="import-file-input" accept=".zip">
+        </label>
+
+        <div id="import-status"></div>
+    </div>
+
+    <div class="section-card" id="imported-tree-card" style="display:none;">
+        <h3 class="section-title">Imported Sample Library</h3>
+        <audio id="preview-player" controls></audio>
+        <div id="imported-tree"></div>
+    </div>
+
+</div>
+
+<!-- ── Footer ──────────────────────────────────────────────────────────── -->
+<footer>
+    <div class="footer-inner">
+        <span>© 2026 XKERO_Z Studio Ecosystem &mdash; UltraBox Companion</span>
+        <div style="display:flex; gap:20px; flex-wrap:wrap;">
+            <a href="/compiler">⚙ Sample Compiler</a>
+            <a href="https://ultraabox.github.io/" target="_blank">UltraBox ↗</a>
+            <a href="https://github.com/ultraabox/ultrabox_typescript" target="_blank">UltraBox Source ↗</a>
+            <a href="https://beepbox.miraheze.org/wiki/UltraBox" target="_blank">UltraBox Wiki ↗</a>
+            <a href="https://filegarden.com/" target="_blank">File Garden (sample hosting) ↗</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+"use strict";
+
+/* ── Tab switching ─────────────────────────────────────────────────────── */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    });
+});
+
+/* Hide "Loading UltraBox…" once the iframe loads */
+document.getElementById('ultrabox-frame').addEventListener('load', () => {
+    document.getElementById('frame-loading-msg').style.display = 'none';
+});
+
+/* ── Sample URL Manager ────────────────────────────────────────────────── */
+let sampleList = JSON.parse(localStorage.getItem('xkero_samples') || '[]');
+
+function saveSamples() {
+    localStorage.setItem('xkero_samples', JSON.stringify(sampleList));
+}
+
+function renderSampleList() {
+    const ul = document.getElementById('sample-list');
+    ul.innerHTML = '';
+    if (sampleList.length === 0) {
+        ul.innerHTML = '<li style="color:var(--muted);font-style:italic;border:none;background:none;padding:4px 0;">No samples added yet.</li>';
+        updateGeneratedURL();
+        return;
+    }
+    sampleList.forEach((s, i) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <span class="sample-name" title="${s.url}">${s.name || s.url.split('/').pop()}</span>
+            <span class="sample-url">${s.url}</span>
+            <button class="btn" style="padding:3px 8px;font-size:0.75rem;" onclick="removeSample(${i})">✕</button>
+        `;
+        ul.appendChild(li);
+    });
+    updateGeneratedURL();
+}
+
+function removeSample(i) {
+    sampleList.splice(i, 1);
+    saveSamples();
+    renderSampleList();
+}
+
+document.getElementById('add-sample-btn').addEventListener('click', () => {
+    const urlInput  = document.getElementById('new-sample-url');
+    const nameInput = document.getElementById('new-sample-name');
+    const url = urlInput.value.trim();
+    if (!url) return;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        alert('Please enter a full URL starting with http:// or https://');
+        return;
+    }
+    sampleList.push({ url, name: nameInput.value.trim() });
+    saveSamples();
+    renderSampleList();
+    urlInput.value = '';
+    nameInput.value = '';
+});
+
+document.getElementById('new-sample-url').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('add-sample-btn').click();
+});
+
+document.getElementById('clear-samples-btn').addEventListener('click', () => {
+    if (sampleList.length && confirm('Clear all sample URLs?')) {
+        sampleList = [];
+        saveSamples();
+        renderSampleList();
+    }
+});
+
+document.getElementById('export-list-btn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(sampleList, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'xkero_samples.json';
+    a.click();
+});
+
+document.getElementById('import-list-btn').addEventListener('click', () => {
+    document.getElementById('import-list-file').click();
+});
+document.getElementById('import-list-file').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (!Array.isArray(data)) throw new Error('Expected an array.');
+            sampleList = data.filter(s => s && typeof s.url === 'string');
+            saveSamples();
+            renderSampleList();
+        } catch (err) {
+            alert('Invalid JSON file: ' + err.message);
+        }
+    };
+    reader.readAsText(file);
+    this.value = '';
+});
+
+/* Build the UltraBox URL with custom samples encoded */
+function buildUltraBoxURL() {
+    if (sampleList.length === 0) return null;
+    // UltraBox accepts custom samples via the "customSamples" query parameter
+    // Format: https://ultraabox.github.io/?customSamples=url1|url2|...
+    const encoded = sampleList.map(s => encodeURIComponent(s.url)).join('|');
+    return `https://ultraabox.github.io/?customSamples=${encoded}`;
+}
+
+function updateGeneratedURL() {
+    const url = buildUltraBoxURL();
+    const box = document.getElementById('generated-url-box');
+    const openFrameBtn  = document.getElementById('open-in-frame-btn');
+    const openNewTabBtn = document.getElementById('open-in-newtab-btn');
+    const copyBtn       = document.getElementById('copy-url-btn');
+
+    if (url) {
+        box.textContent = url;
+        openFrameBtn.disabled  = false;
+        openNewTabBtn.disabled = false;
+        copyBtn.disabled       = false;
+    } else {
+        box.textContent = 'Add at least one sample URL above to generate a link.';
+        openFrameBtn.disabled  = true;
+        openNewTabBtn.disabled = true;
+        copyBtn.disabled       = true;
+    }
+}
+
+document.getElementById('open-in-frame-btn').addEventListener('click', () => {
+    const url = buildUltraBoxURL();
+    if (!url) return;
+    document.getElementById('ultrabox-frame').src = url;
+    document.getElementById('frame-loading-msg').style.display = '';
+    // Switch to the editor tab
+    document.querySelector('[data-tab="ultrabox"]').click();
+});
+
+document.getElementById('open-in-newtab-btn').addEventListener('click', () => {
+    const url = buildUltraBoxURL();
+    if (url) window.open(url, '_blank');
+});
+
+document.getElementById('copy-url-btn').addEventListener('click', () => {
+    const url = buildUltraBoxURL();
+    if (!url) return;
+    navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('copy-url-btn');
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = orig; }, 1500);
+    });
+});
+
+/* Initialise from localStorage */
+renderSampleList();
+
+/* ── Import Sorted Pack ────────────────────────────────────────────────── */
+const dropZone   = document.getElementById('drop-zone');
+const fileInput  = document.getElementById('import-file-input');
+const statusDiv  = document.getElementById('import-status');
+const treeCard   = document.getElementById('imported-tree-card');
+const treeDiv    = document.getElementById('imported-tree');
+const previewAudio = document.getElementById('preview-player');
+
+function setStatus(msg, type) {
+    statusDiv.textContent = msg;
+    statusDiv.className   = type;
+    statusDiv.style.display = msg ? 'block' : 'none';
+    if (msg) statusDiv.style.marginTop = '12px';
+}
+
+async function uploadImportZip(file) {
+    setStatus('Importing… please wait.', 'inf');
+    treeCard.style.display = 'none';
+
+    const fd = new FormData();
+    fd.append('file', file);
+
+    try {
+        const res  = await fetch('/api/import-samples', { method: 'POST', body: fd });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || 'Server error');
+
+        setStatus(`✓ ${data.msg}`, 'ok');
+        buildImportedTree(data.manifest);
+    } catch (err) {
+        setStatus(`✗ ${err.message}`, 'err');
+    }
+}
+
+function buildImportedTree(manifest) {
+    treeDiv.innerHTML = '';
+    let total = 0;
+
+    for (const [category, instruments] of Object.entries(manifest)) {
+        const catEl = document.createElement('div');
+        catEl.className = 'tree-category';
+        catEl.textContent = `📁 ${category}`;
+        treeDiv.appendChild(catEl);
+
+        for (const [instrument, files] of Object.entries(instruments)) {
+            const instEl = document.createElement('div');
+            instEl.className = 'tree-instrument';
+            instEl.textContent = `└─ 📁 ${instrument} (${files.length})`;
+            treeDiv.appendChild(instEl);
+
+            files.forEach(f => {
+                const sampleEl = document.createElement('div');
+                sampleEl.className = 'tree-sample';
+                sampleEl.innerHTML = `<span class="play-dot"></span>📄 ${f.name}`;
+                sampleEl.addEventListener('click', () => {
+                    document.querySelectorAll('.tree-sample').forEach(s => s.classList.remove('playing'));
+                    sampleEl.classList.add('playing');
+                    previewAudio.src = f.url;
+                    previewAudio.style.display = 'block';
+                    previewAudio.play().catch(() => {});
+                });
+                treeDiv.appendChild(sampleEl);
+                total++;
+            });
+        }
+    }
+
+    if (total === 0) {
+        treeDiv.innerHTML = '<p style="color:var(--muted);font-style:italic;">No audio files were found in the archive.</p>';
+    }
+
+    treeCard.style.display = 'block';
+}
+
+/* Drag-and-drop on the drop zone */
+['dragenter', 'dragover'].forEach(evt => {
+    dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+});
+['dragleave', 'drop'].forEach(evt => {
+    dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.remove('dragover'); });
+});
+dropZone.addEventListener('drop', e => {
+    const file = e.dataTransfer.files[0];
+    if (file) uploadImportZip(file);
+});
+
+fileInput.addEventListener('change', function() {
+    if (this.files[0]) uploadImportZip(this.files[0]);
+    this.value = '';
+});
+
+previewAudio.addEventListener('ended', () => {
+    document.querySelectorAll('.tree-sample').forEach(s => s.classList.remove('playing'));
+});
+</script>
+</body>
+</html>
