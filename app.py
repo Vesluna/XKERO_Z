@@ -2,6 +2,7 @@ import os
 import re
 import shutil
 import zipfile
+import uuid
 from pathlib import Path
 from flask import Flask, render_template, request, send_file, jsonify, send_from_directory
 
@@ -223,7 +224,7 @@ def process_audio_library(extract_path: str, target_path: str, settings: dict) -
 
 
 # ---------------------------------------------------------------------------
-# ROUTES — Navigation
+# ROUTES
 # ---------------------------------------------------------------------------
 
 @app.route('/')
@@ -236,7 +237,96 @@ def compiler_page():
     """Audio library compiler / sorter tool."""
     return render_template('sample-compiler.html')
 
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    """Handle ZIP upload and start processing."""
+    if 'file' not in request.files:
+        return jsonify({"status": "error", "error": "No file part"}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"status": "error", "error": "No selected file"}), 400
+    
+    if file and file.filename.endswith('.zip'):
+        folder_id = str(uuid.uuid4())
+        upload_path = os.path.join(UPLOAD_FOLDER, f"{folder_id}.zip")
+        file.save(upload_path)
+        
+        extract_path = os.path.join(UPLOAD_FOLDER, folder_id)
+        processed_path = os.path.join(OUTPUT_FOLDER, folder_id)
+        os.makedirs(extract_path, exist_ok=True)
+        os.makedirs(processed_path, exist_ok=True)
+        
+        try:
+            with zipfile.ZipFile(upload_path, 'r') as zip_ref:
+                zip_ref.extractall(extract_path)
+            
+            settings = {
+                'nested_action': request.form.get('nested_action', 'extract'),
+                'sort_sf2': request.form.get('sort_sf2') == 'true',
+                'isolate_misc': request.form.get('isolate_misc') == 'true',
+                'strict_mode': request.form.get('strict_mode') == 'false'
+            }
+            
+            if settings['nested_action'] != 'ignore':
+                extract_nested_zips(extract_path, settings['nested_action'])
+            
+            file_count = process_audio_library(extract_path, processed_path, settings)
+            
+            # Create a ZIP of the processed results
+            result_zip = os.path.join(OUTPUT_FOLDER, f"{folder_id}_sorted.zip")
+            with zipfile.ZipFile(result_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for root, _, files in os.walk(processed_path):
+                    for f in files:
+                        abs_path = os.path.join(root, f)
+                        rel_path = os.path.relpath(abs_path, processed_path)
+                        zipf.write(abs_path, rel_path)
+            
+            return jsonify({
+                "status": "success",
+                "folder_id": folder_id,
+                "file_count": file_count
+            })
+            
+        except Exception as e:
+            return jsonify({"status": "error", "error": str(e)}), 500
+        finally:
+            # Clean up extraction temp files
+            if os.path.exists(extract_path):
+                shutil.rmtree(extract_path)
+            if os.path.exists(upload_path):
+                os.remove(upload_path)
+    
+    return jsonify({"status": "error", "error": "Invalid file format"}), 400
 
+@app.route('/download/<folder_id>')
+def download_result(folder_id):
+    """Download the sorted ZIP file."""
+    zip_path = os.path.join(OUTPUT_FOLDER, f"{folder_id}_sorted.zip")
+    if os.path.exists(zip_path):
+        return send_file(zip_path, as_attachment=True, download_name="XKERO_Z_Sorted_Library.zip")
+    return "File not found", 404
 
+@app.route('/api/explore/<folder_id>')
+def explore_folder(folder_id):
+    """Return a JSON tree of the processed folder."""
+    processed_path = os.path.join(OUTPUT_FOLDER, folder_id)
+    if not os.path.exists(processed_path):
+        return jsonify({"error": "Folder not found"}), 404
+    
+    def get_tree(path):
+        tree = {}
+        for item in os.listdir(path):
+            item_path = os.path.join(path, item)
+            if os.path.isdir(item_path):
+                tree[item] = get_tree(item_path)
+            else:
+                tree[item] = "file"
+        return tree
+    
+    return jsonify({"tree": get_tree(processed_path)})
 
-# ---------------------------------------------------------------------------
+if __name__ == "__main__":
+    print("XKERO_Z Tools Suite is starting...")
+    print("Access the tools at: http://127.0.0.1:5000")
+    app.run(host='0.0.0.0', port=5000, debug=True)
