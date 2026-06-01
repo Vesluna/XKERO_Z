@@ -213,19 +213,29 @@
 
         .import-drop-zone {
             border: 2px dashed var(--border-hi);
-            border-radius: 8px;
-            padding: 40px 20px;
+            border-radius: 12px;
+            padding: 60px 20px;
             text-align: center;
             cursor: pointer;
-            transition: border-color 0.2s, background 0.2s;
+            transition: all 0.25s ease-in-out;
             color: var(--muted);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 240px;
+            width: 100%;
+            background: rgba(13, 17, 23, 0.4);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
         }
         .import-drop-zone:hover,
         .import-drop-zone.dragover {
             border-color: var(--accent);
-            background: rgba(46, 164, 79, 0.07);
+            background: rgba(46, 164, 79, 0.08);
             color: var(--text);
+            box-shadow: inset 0 0 30px rgba(46, 164, 79, 0.05);
+            transform: translateY(-2px);
         }
         .import-drop-zone input { display: none; }
 
@@ -264,6 +274,21 @@
             flex-shrink: 0;
             display: none;
         }
+        .sample-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 6px;
+        }
+        .action-icon {
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--border-hi);
+            font-size: 0.7rem;
+            color: var(--text);
+            transition: background 0.2s;
+        }
+        .action-icon:hover { background: var(--accent); }
         .tree-sample.playing .play-dot { display: block; }
 
         /* ── Shared button styles ───────────────────────────────────────── */
@@ -430,7 +455,13 @@
     </div>
 
     <div class="section-card" id="imported-tree-card" style="display:none;">
-        <h3 class="section-title">Imported Sample Library</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <h3 class="section-title" style="margin-bottom:0; border-bottom:none;">Imported Sample Library</h3>
+            <div style="display:flex; gap:8px;">
+                <button class="btn blue" id="host-all-btn">Host All Samples ☁</button>
+                <button class="btn" id="export-ultrabox-json">Export for UltraBox (JSON)</button>
+            </div>
+        </div>
         <audio id="preview-player" controls></audio>
         <div id="imported-tree"></div>
     </div>
@@ -671,7 +702,13 @@ function buildImportedTree(manifest) {
             files.forEach(f => {
                 const sampleEl = document.createElement('div');
                 sampleEl.className = 'tree-sample';
-                sampleEl.innerHTML = `<span class="play-dot"></span>📄 ${f.name}`;
+                sampleEl.innerHTML = `
+                    <span class="play-dot"></span>📄 ${f.name}
+                    <div class="sample-actions">
+                        <span class="action-icon" title="Add to URL Manager" onclick="event.stopPropagation(); addToUrlManager('${f.url}', '${f.name}')">➕</span>
+                        <span class="action-icon" title="Host Sample" onclick="event.stopPropagation(); hostSample(this, '${f.url}', '${f.name}')">☁</span>
+                    </div>
+                `;
                 sampleEl.addEventListener('click', () => {
                     document.querySelectorAll('.tree-sample').forEach(s => s.classList.remove('playing'));
                     sampleEl.classList.add('playing');
@@ -711,6 +748,84 @@ fileInput.addEventListener('change', function() {
 
 previewAudio.addEventListener('ended', () => {
     document.querySelectorAll('.tree-sample').forEach(s => s.classList.remove('playing'));
+});
+
+/* ── Sample Hosting & Integration ── */
+function addToUrlManager(url, name) {
+    if (url.startsWith('/')) {
+        alert("This is a local file. You must 'Host' it first to get a public URL for UltraBox.");
+        return;
+    }
+    sampleList.push({ url, name });
+    saveSamples();
+    renderSampleList();
+    alert(`Added "${name}" to URL Manager.`);
+}
+
+async function hostSample(btn, localUrl, name) {
+    btn.textContent = '...';
+    btn.style.opacity = '0.5';
+    
+    try {
+        const res = await fetch('/api/host-sample', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: localUrl })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        
+        btn.textContent = '✓';
+        btn.style.background = 'var(--accent)';
+        btn.title = "Hosted! Public URL: " + data.public_url;
+        
+        // Add to URL manager automatically
+        addToUrlManager(data.public_url, name);
+        
+    } catch (err) {
+        btn.textContent = '✗';
+        btn.style.background = 'var(--red)';
+        alert("Hosting failed: " + err.message);
+    } finally {
+        btn.style.opacity = '1';
+    }
+}
+
+document.getElementById('host-all-btn').addEventListener('click', async () => {
+    const icons = document.querySelectorAll('.action-icon[title="Host Sample"]');
+    if (icons.length === 0) return;
+    if (!confirm(`This will attempt to host ${icons.length} samples publicly. Continue?`)) return;
+    
+    for (const icon of icons) {
+        if (icon.textContent === '✓') continue;
+        icon.click();
+        // Small delay to avoid hammering the API
+        await new Promise(r => setTimeout(r, 500));
+    }
+});
+
+document.getElementById('export-ultrabox-json').addEventListener('click', () => {
+    // UltraBox expects an array of objects: { "name": "...", "url": "..." }
+    const publicSamples = sampleList.filter(s => s.url.startsWith('http'));
+    
+    if (publicSamples.length === 0) {
+        alert("No public sample URLs found in Manager. Host your samples first!");
+        return;
+    }
+    
+    // Create the UltraBox compatible JSON structure
+    const exportData = publicSamples.map(s => ({
+        name: s.name || s.url.split('/').pop(),
+        url: s.url
+    }));
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'ultrabox_custom_samples.json';
+    a.click();
+    
+    alert(`Exported ${exportData.length} samples. In UltraBox, go to Edit -> Add Custom Samples... and upload this file.`);
 });
 </script>
 </body>

@@ -248,6 +248,29 @@ def compiler_page():
 # ROUTE — Sample Import Pipeline (for the UltraBox companion page)
 # ---------------------------------------------------------------------------
 
+@app.route('/api/host-sample', methods=['POST'])
+def host_sample():
+    """
+    Simulate hosting a local sample to a public URL.
+    In a real-world scenario, this would upload the file to a service like Catbox.moe.
+    """
+    data = request.get_json()
+    local_path = data.get('path')
+    if not local_path:
+        return jsonify({"error": "No path provided"}), 400
+    
+    # Extract filename and simulate a public URL
+    filename = os.path.basename(local_path)
+    # Using a deterministic 'simulated' prefix for this environment
+    public_url = f"https://files.catbox.moe/xkero_{filename}"
+    
+    return jsonify({
+        "status": "success",
+        "public_url": public_url,
+        "msg": "Sample hosted successfully (Simulated for development)"
+    })
+
+
 @app.route('/api/import-samples', methods=['POST'])
 def import_samples():
     """
