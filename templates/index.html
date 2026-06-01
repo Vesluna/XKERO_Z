@@ -3,71 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XKERO_Z Tools</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>XKERO_Z Tools Desktop</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            background-color: #1a202c;
-            color: #e2e8f0;
-            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            overflow: hidden;
         }
-        .container {
-            max-width: 800px;
+        
+        .desktop {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
-        .tool-card {
-            background-color: #2d3748;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        
+        .taskbar {
+            background-color: rgba(0, 0, 0, 0.8);
+            height: 50px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
         }
-        .tool-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        .tool-card h2 {
-            color: #63b3ed;
-        }
-        .tool-card p {
-            color: #a0aec0;
-        }
-        .tool-card a {
-            display: inline-block;
-            margin-top: 1rem;
-            padding: 0.5rem 1rem;
-            background-color: #4299e1;
+        
+        .taskbar-item {
+            background-color: rgba(255, 255, 255, 0.1);
             color: white;
-            border-radius: 0.25rem;
-            text-decoration: none;
-            transition: background-color 0.2s ease-in-out;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
         }
-        .tool-card a:hover {
-            background-color: #3182ce;
+        
+        .taskbar-item:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .taskbar-spacer {
+            flex: 1;
+        }
+        
+        .system-tray {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            color: white;
+            font-size: 0.85rem;
+        }
+        
+        .desktop-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            margin-bottom: 60px;
+        }
+        
+        .desktop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 20px;
+            max-width: 600px;
+        }
+        
+        .desktop-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .desktop-icon:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+        
+        .desktop-icon:active {
+            transform: scale(0.95);
+        }
+        
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s;
+        }
+        
+        .desktop-icon:hover .icon-box {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transform: translateY(-5px);
+        }
+        
+        .icon-label {
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            max-width: 100px;
+            word-wrap: break-word;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .header {
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        
+        /* Scrollbar styling */
+        .desktop-content::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .desktop-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .desktop-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+        }
+        
+        .desktop-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .coming-soon {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        .coming-soon .icon-box {
+            filter: grayscale(100%);
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
-    <div class="container mx-auto p-6">
-        <h1 class="text-5xl font-extrabold text-center mb-12 text-white">XKERO_Z Tools Suite</h1>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Sample Compiler Card -->
-            <div class="tool-card">
-                <h2 class="text-3xl font-bold mb-4">Sample Compiler</h2>
-                <p class="text-lg">Organize your audio samples into a structured library based on instrument type. Supports various audio formats and nested ZIP files.</p>
-                <a href="/compiler">Launch Tool</a>
+<body>
+    <div class="desktop">
+        <div class="desktop-content">
+            <div class="header">
+                <h1><i class="fas fa-cube"></i> XKERO_Z Tools</h1>
+                <p>Your professional audio utility suite</p>
             </div>
-
-            <!-- Placeholder for Future Tools -->
-            <div class="tool-card opacity-50 cursor-not-allowed">
-                <h2 class="text-3xl font-bold mb-4">[New Tool Coming Soon]</h2>
-                <p class="text-lg">Stay tuned for more powerful audio tools to enhance your workflow!</p>
-                <span class="inline-block mt-4 px-4 py-2 bg-gray-600 text-white rounded-md">Coming Soon</span>
+            
+            <div class="desktop-grid">
+                <!-- Sample Compiler Tool -->
+                <div class="desktop-icon" onclick="openTool('/compiler')">
+                    <div class="icon-box">
+                        <i class="fas fa-compact-disc"></i>
+                    </div>
+                    <div class="icon-label">Sample Compiler</div>
+                </div>
+                
+                <!-- Coming Soon Tools -->
+                <div class="desktop-icon coming-soon">
+                    <div class="icon-box">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="icon-label">Tool #2</div>
+                </div>
+                
+                <div class="desktop-icon coming-soon">
+                    <div class="icon-box">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="icon-label">Tool #3</div>
+                </div>
             </div>
         </div>
-
-        <footer class="text-center text-gray-600 mt-16">
-            <p>&copy; 2026 XKERO_Z. All rights reserved.</p>
-        </footer>
+        
+        <!-- Taskbar -->
+        <div class="taskbar">
+            <div class="taskbar-item">
+                <i class="fas fa-home"></i> XKERO_Z
+            </div>
+            <div class="taskbar-spacer"></div>
+            <div class="system-tray">
+                <span><i class="fas fa-clock"></i> <span id="time">00:00</span></span>
+            </div>
+        </div>
     </div>
+    
+    <script>
+        function openTool(path) {
+            window.location.href = path;
+        }
+        
+        // Update time in taskbar
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('time').textContent = `${hours}:${minutes}`;
+        }
+        
+        updateTime();
+        setInterval(updateTime, 60000);
+    </script>
 </body>
 </html>

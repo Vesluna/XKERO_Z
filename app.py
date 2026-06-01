@@ -24,17 +24,17 @@ os.makedirs(SAMPLE_WORKSPACE, exist_ok=True)
 INSTRUMENT_TAXONOMY = {
     "Strings": {
         "Acoustic Guitar": ["acousticguitar", "acguitar", "steelstring", "nylonstring", "acousticgtr"],
-        "Electric Guitar": ["electricguitar", "eguitar", "cleangtr", "distortedguitar", "overdrivegtr", "egtr", "leadgtr"],
-        "Bass Guitar": ["bassguitar", "electricbass", "pickedbass", "fingeredbass", "fretlessbass", "ebass", "slapbass"],
+        "Electric Guitar": ["electricguitar", "eguitar", "cleangtr", "distortedguitar", "overdrivegtr", "egtr", "leadgtr", "powerchord"],
+        "Bass Guitar": ["bassguitar", "electricbass", "pickedbass", "fingeredbass", "fretlessbass", "ebass", "slapbass", "bass", "subbass"],
         "Violin": ["violin", "stradivarius", "fiddle", "violins"],
         "Viola": ["viola", "violas"],
-        "Cello": ["cello", "violoncello", "cellos"],
+        "Cello": ["cello", "violoncello", "cellos", "pizzicato"],
         "Double Bass": ["doublebass", "contrabass", "uprightbass", "standupbass"],
-        "Harp": ["harp", "lyre"],
+        "Harp": ["harp", "lyre", "celticharp"],
         "Banjo": ["banjo", "banjos"],
         "Mandolin": ["mandolin", "mandoline"],
         "Ukulele": ["ukulele", "uku", "uke"],
-        "Generic Strings": ["strings", "stringensemble", "orchestralstrings", "staccatostrings", "pizzicato", "arco", "synthstrings"],
+        "Generic Strings": ["strings", "stringensemble", "orchestralstrings", "staccatostrings", "pizzicato", "arco", "synthstrings", "string"],
     },
     "Woodwinds": {
         "Flute": ["flute", "piccolo", "panflute", "panpipes", "westernflute", "shakuhachi"],
@@ -46,66 +46,67 @@ INSTRUMENT_TAXONOMY = {
         "Generic Woodwinds": ["woodwind", "reed", "windinstrument", "woodwinds"],
     },
     "Brass": {
-        "Trumpet": ["trumpet", "cornet", "flugelhorn", "piccolotrumpet"],
+        "Trumpet": ["trumpet", "cornet", "flugelhorn", "piccolotrumpet", "tr"],
         "Trombone": ["trombone", "basstrombone", "valvetrombone"],
         "Tuba": ["tuba", "sousaphone", "euphonium"],
         "French Horn": ["frenchhorn", "horn", "orchestralhorn", "horns"],
         "Generic Brass": ["brass", "brasssection", "brasshorns", "brassensemble", "hornsection", "stabs"],
     },
     "Percussion & Drums": {
-        "Kick Drum": ["kick", "bassdrum", "kickdrum", "bdrum", "subkick", "punch"],
-        "Snare Drum": ["snare", "snaredrum", "sdrum", "rimshot", "rim", "ghostnote"],
-        "Hi-Hat": ["hihat", "hats", "openhat", "closedhat", "cymbalhat", "pedalhat"],
+        "Kick Drum": ["kick", "bassdrum", "kickdrum", "bdrum", "subkick", "punch", "bd"],
+        "Snare Drum": ["snare", "snaredrum", "sdrum", "rimshot", "rim", "ghostnote", "sd"],
+        "Hi-Hat": ["hihat", "hats", "openhat", "closedhat", "cymbalhat", "pedalhat", "hat"],
         "Tom Tom": ["tom", "tomtom", "floortom", "racktom", "toms"],
         "Cymbals": ["cymbal", "crash", "ride", "splash", "chinacym", "gong", "cymbals"],
         "Clap & Snap": ["clap", "handclap", "snap", "fingersnap", "claps"],
         "Cowbell": ["cowbell", "woodblock", "agogobell", "jamblock"],
         "Timpani": ["timpani", "kettledrum", "timp"],
         "Latin Percussion": ["conga", "bongo", "timbale", "cajon", "djembe", "cuica", "clave"],
-        "Shakers & Toys": ["shaker", "cabasa", "maraca", "tambourine", "guiro", "triangleperc"],
-        "Electronic Drums": ["808", "909", "707", "linndrum", "electronicperc", "synthdrum", "drummachine"],
+        "Shakers & Toys": ["shaker", "cabasa", "maraca", "tambourine", "guiro", "triangleperc", "fingercym"],
+        "Electronic Drums": ["808", "909", "707", "linndrum", "electronicperc", "synthdrum", "drummachine", "drum"],
     },
     "Chromatic & Mallets": {
-        "Bells": ["bell", "bells", "glockenspiel", "tubularbells", "handbells", "carillon", "orchestralbells", "agogo", "jingle"],
+        "Bells": ["bell", "bells", "glockenspiel", "tubularbells", "handbells", "carillon", "orchestralbells", "agogo", "jingle", "tubularbell"],
         "Chimes": ["chime", "chimes", "windchimes", "barchimes"],
-        "Marimba & Xylophone": ["marimba", "xylophone", "vibraphone", "balafon", "xylo", "vibes"],
+        "Marimba & Xylophone": ["marimba", "xylophone", "vibaphone", "balafon", "xylo", "vibes"],
         "Music Box": ["musicbox", "spieluhr", "lullaby"],
     },
     "Keyboards & Synths": {
         "Acoustic Piano": ["piano", "grandpiano", "uprightpiano", "pianoloop", "fortepiano", "keys"],
         "Electric Piano": ["electricpiano", "rhodes", "wurlitzer", "epiano", "clavinet", "dx7piano"],
-        "Organ": ["organ", "hammond", "churchorgan", "pipeorgan", "b3organ", "reedorgan"],
+        "Organ": ["organ", "hammond", "churchorgan", "pipeorgan", "b3organ", "reedorgan", "sacattoorgan"],
         "Harpsichord": ["harpsichord", "clavin", "cembalo"],
         "Accordion": ["accordion", "harmonica", "melodica", "concertina"],
-        "Synth Leads": ["lead", "synthlead", "monolead", "sawlead", "squarelead", "glide"],
+        "Synth Leads": ["lead", "synthlead", "monolead", "sawlead", "squarelead", "glide", "rublead"],
         "Synth Pads": ["pad", "synthpad", "ambientpad", "stringpad", "atmosphere", "pads"],
         "Synth Plucks": ["pluck", "synthpluck", "staccatosynth", "plucks", "malletsynth"],
-        "Synth Bass": ["synthbass", "subbass", "sub", "wobblebass", "acidbass", "303", "reese", "808bass", "donk"],
-        "Chiptune & Waves": ["chiptune", "nes", "gameboy", "squarewave", "sawwave", "trianglewave", "sinewave", "pulsewave", "noise", "2bit", "4bit", "8bit", "16bit", "waveform", "sid", "ym2612", "chipping"],
+        "Synth Bass": ["synthbass", "subbass", "sub", "wobblebass", "acidbass", "303", "reese", "808bass", "donk", "spitsybass"],
+        "Chiptune & Waves": ["chiptune", "nes", "gameboy", "squarewave", "sawwave", "trianglewave", "sinewave", "pulsewave", "noise", "2bit", "4bit", "8bit", "16bit", "waveform", "sid", "ym2612", "chipping", "rezsqr"],
         "Mellotron": ["mellotron", "stringsynth", "tronflute"],
+        "Generic Synths": ["synth", "synthesizer", "syn"],
     },
     "World & Traditional": {
         "Sitar & Tanpura": ["sitar", "tanpura", "tambura"],
         "Koto & Shamisen": ["koto", "shamisen", "guzheng"],
         "Oud & Lute": ["oud", "lute", "pipa", "bouzouki"],
-        "Bagpipes": ["bagpipe", "bagpipes", "uilleann"],
+        "Bagpipes": ["bagpipe", "bagpipes", "uilleann", "bagpipesound"],
         "Didgeridoo": ["didgeridoo", "didge"],
         "Kalimba": ["kalimba", "thumbpiano", "mbira"],
     },
     "Vocals": {
         "Choir": ["choir", "chorus", "gospelchoir", "vocalensemble", "chants", "gregorian"],
         "Vocal Loops": ["vocalloop", "acapella", "vocalphrase", "vocalhook", "vocalchop"],
-        "Vocal FX": ["vocalfx", "chant", "adlib", "grunt", "shout", "vox", "beatbox", "breath"],
+        "Vocal FX": ["vocalfx", "chant", "adlib", "grunt", "shout", "vox", "beatbox", "breath", "ah", "heeyy"],
     },
     "Foley & Environment": {
         "Nature Elements": ["rain", "wind", "thunder", "water", "ocean", "birds", "fire", "stream"],
-        "Footsteps": ["footsteps", "walk", "run", "gravel", "concrete"],
-        "Mechanical & Tech": ["glitch", "click", "ui", "button", "computer", "machine", "servo"],
+        "Footsteps": ["footsteps", "walk", "run", "gravel", "concrete", "woodstep"],
+        "Mechanical & Tech": ["glitch", "click", "ui", "button", "computer", "machine", "servo", "alarm", "beep"],
         "Vinyl & LoFi": ["vinyl", "crackle", "cassette", "tapehiss", "lofi"],
     },
     "Sound Design & FX": {
-        "Cinematic FX": ["impact", "hit", "boom", "subdrop", "explosion", "subhit", "braam"],
-        "Transitions": ["riser", "rise", "fall", "downlifter", "sweep", "whoosh", "transition", "uplifter", "swoosh"],
+        "Cinematic FX": ["impact", "hit", "boom", "subdrop", "explosion", "subhit", "braam", "orchestrahit"],
+        "Transitions": ["riser", "rise", "fall", "downlifter", "sweep", "whoosh", "transition", "uplifter", "swoosh", "reverse"],
         "Textures": ["drone", "texture", "noisefloor", "ambientfx", "atmospherefx", "soundscape"],
     },
 }
@@ -122,13 +123,21 @@ KEYWORD_LOOKUP.sort(key=lambda x: len(x[0]), reverse=True)
 
 def find_matching_instrument(name: str, strict_mode: bool = False):
     """Return (category, folder_name) for the best keyword match, or (None, None)."""
-    # Clean the name and split into words for more precise matching
-    clean_name_words = re.findall(r'\b[a-z0-9]+\b', name.lower())
+    # Clean the name: remove non-alphanumeric chars and convert to lowercase
+    clean_name = re.sub(r'[^a-z0-9]', ' ', name.lower())
+    clean_name_words = clean_name.split()
     
+    # First pass: look for exact whole-word matches
     for keyword, category, folder_name in KEYWORD_LOOKUP:
-        # Check if the keyword exists as a whole word in the cleaned name's word list
         if keyword in clean_name_words:
             return category, folder_name
+            
+    # Second pass: look for substring matches if not in strict mode
+    if not strict_mode:
+        for keyword, category, folder_name in KEYWORD_LOOKUP:
+            if keyword in name.lower():
+                return category, folder_name
+                
     return None, None
 
 
@@ -265,7 +274,7 @@ def upload_file():
                 'nested_action': request.form.get('nested_action', 'extract'),
                 'sort_sf2': request.form.get('sort_sf2') == 'true',
                 'isolate_misc': request.form.get('isolate_misc') == 'true',
-                'strict_mode': request.form.get('strict_mode') == 'false'
+                'strict_mode': request.form.get('strict_mode') == 'true'
             }
             
             if settings['nested_action'] != 'ignore':
